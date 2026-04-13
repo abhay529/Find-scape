@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WordRunner — Hybrid Word & Survival Game</title>
+    <meta name="description" content="A hybrid word guessing and obstacle survival game. Guess words, dodge obstacles, survive!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ═══════════════════════════════════════ -->
+    <!-- MAIN MENU SCREEN                        -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="menu-screen" class="screen active">
+        <div class="menu-bg-particles" id="menu-particles"></div>
+        <div class="menu-container">
+            <div class="logo-container">
+                <h1 class="game-title" id="game-title">
+                    <span class="title-word">WORD</span><span class="title-accent">RUNNER</span>
+                </h1>
+                <p class="subtitle">Guess Words · Dodge Obstacles · Survive</p>
+            </div>
+
+            <div class="mode-selector" id="mode-selector">
+                <button class="mode-btn" data-mode="classic" id="mode-classic">
+                    <div class="mode-icon-wrap"><span class="mode-icon">🎮</span></div>
+                    <span class="mode-name">Classic</span>
+                    <span class="mode-desc">Balanced difficulty · 5 lives · 6 guesses</span>
+                </button>
+                <button class="mode-btn" data-mode="hardcore" id="mode-hardcore">
+                    <div class="mode-icon-wrap"><span class="mode-icon">💀</span></div>
+                    <span class="mode-name">Hardcore</span>
+                    <span class="mode-desc">No mercy · 3 lives · 3 guesses</span>
+                </button>
+                <button class="mode-btn" data-mode="timeAttack" id="mode-timeattack">
+                    <div class="mode-icon-wrap"><span class="mode-icon">⏱️</span></div>
+                    <span class="mode-name">Time Attack</span>
+                    <span class="mode-desc">Beat the clock · 60 seconds · 5 guesses</span>
+                </button>
+            </div>
+
+            <div class="menu-footer">
+                <div class="high-score-display">
+                    <span class="hs-label">HIGH SCORE</span>
+                    <span class="hs-value" id="menu-high-score">0</span>
+                </div>
+                <div class="menu-controls">
+                    <button id="sound-toggle" class="icon-btn active" title="Toggle Sound">
+                        <span class="icon-on">🔊</span><span class="icon-off">🔇</span>
+                    </button>
+                    <button id="music-toggle" class="icon-btn active" title="Toggle Music">
+                        <span class="icon-on">🎵</span><span class="icon-off">🎵</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="controls-hint">
+                <span>⌨️ <strong>Space/↑</strong> Jump</span>
+                <span>⬇️ <strong>↓</strong> Slide</span>
+                <span>🔤 <strong>A-Z</strong> Guess</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- GAME SCREEN                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="game-screen" class="screen">
+        <!-- HUD Top Bar -->
+        <div id="game-hud" class="game-hud">
+            <div class="hud-section hud-left">
+                <div class="health-container" id="health-container">
+                    <div class="health-hearts" id="health-hearts"></div>
+                </div>
+                <div class="shield-indicator" id="shield-indicator">🛡️</div>
+                <div class="freeze-indicator" id="freeze-indicator">❄️</div>
+            </div>
+
+            <div class="hud-section hud-center">
+                <div class="word-display" id="word-display"></div>
+                <div class="word-category" id="word-category"></div>
+            </div>
+
+            <div class="hud-section hud-right">
+                <div class="stat-block">
+                    <span class="stat-label">SCORE</span>
+                    <span class="stat-value" id="game-score">0</span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">LEVEL</span>
+                    <span class="stat-value" id="game-level">1</span>
+                </div>
+                <div class="stat-block timer-block" id="timer-block" style="display:none;">
+                    <span class="stat-label">TIME</span>
+                    <span class="stat-value timer-value" id="game-timer">60</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Progress Bar -->
+        <div class="word-progress-bar" id="word-progress">
+            <div class="word-progress-fill" id="word-progress-fill"></div>
+        </div>
+
+        <!-- Game Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Floating Notifications -->
+        <div class="combo-display" id="combo-display">
+            <span id="combo-count">0</span><span class="combo-x">×</span> COMBO
+        </div>
+        <div class="powerup-notification" id="powerup-notification"></div>
+        <div class="wrong-guess-overlay" id="wrong-guess-overlay"></div>
+
+        <!-- On-Screen Keyboard -->
+        <div class="keyboard-container" id="keyboard-container">
+            <div class="keyboard-row" id="kb-row-1"></div>
+            <div class="keyboard-row" id="kb-row-2"></div>
+            <div class="keyboard-row" id="kb-row-3"></div>
+        </div>
+
+        <!-- Pause Button -->
+        <button id="pause-btn" class="pause-btn" title="Pause">⏸</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAUSE OVERLAY                           -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="pause-screen" class="screen overlay">
+        <div class="overlay-panel">
+            <h2 class="overlay-title">PAUSED</h2>
+            <div class="overlay-actions">
+                <button id="resume-btn" class="action-btn primary">▶ Resume</button>
+                <button id="quit-btn" class="action-btn secondary">✕ Quit to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- LEVEL UP OVERLAY                        -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="levelup-screen" class="screen overlay">
+        <div class="overlay-panel levelup-panel">
+            <div class="levelup-badge">✦</div>
+            <h2 class="overlay-title levelup-title">WORD COMPLETE!</h2>
+            <div class="levelup-word" id="levelup-word"></div>
+            <div class="levelup-stats" id="levelup-stats"></div>
+            <button id="next-level-btn" class="action-btn primary">Next Level →</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- GAME OVER OVERLAY                       -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="gameover-screen" class="screen overlay">
+        <div class="overlay-panel gameover-panel">
+            <h2 class="overlay-title gameover-title">GAME OVER</h2>
+            <div class="new-highscore" id="new-highscore">🏆 NEW HIGH SCORE! 🏆</div>
+            <div class="gameover-stats" id="gameover-stats"></div>
+            <div class="overlay-actions">
+                <button id="retry-btn" class="action-btn primary">↻ Retry</button>
+                <button id="menu-btn" class="action-btn secondary">Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
